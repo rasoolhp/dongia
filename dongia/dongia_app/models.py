@@ -18,3 +18,10 @@ class Dong(models.Model):
         return self.amount/tedad if tedad else None
     def __str__(self):
             return self.name
+
+class DongRecord(models.Model):
+    for_dong = models.ForeignKey(Dong, on_delete=models.CASCADE,related_name="for_dong",null=True)
+    from_user = models.ForeignKey(User, on_delete=models.CASCADE,related_name="from_user",null=True)
+    to_user = models.ForeignKey(User, on_delete=models.CASCADE,related_name="to_user",null=True)
+    amount = models.FloatField(null=True,blank=True)
+    paid = models.BooleanField(default=False,null=True,blank=True)
