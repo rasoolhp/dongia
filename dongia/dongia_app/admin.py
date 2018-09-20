@@ -1,6 +1,8 @@
 from django.contrib import admin
 from dongia_app.models import *
 
+admin.AdminSite.site_header="DONGIA"
+
 class UserAdmin(admin.ModelAdmin):
     list_display = (
         "name",
