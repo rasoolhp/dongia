@@ -51,23 +51,36 @@ class DongRecord(models.Model):
 
 @receiver(m2m_changed, sender = Dong.dongia.through)
 def m2m_func(sender, instance, action, **kwargs):
+    print ("action:",action)
+    child_records = DongRecord.objects.filter(for_dong__id=instance.id)
+    print ("olds:",child_records)
+    for records in child_records:
+        child_records.delete()
+        print("deleted an old dong record")
+    print ("news:",instance.dongia.all())
     for member in instance.dongia.all():
-        #print(member)
         #this is for find me to me dong!
-        if member != instance.donger:
-            dong_record = DongRecord.objects.get_or_create(
-                for_dong = instance,
-                from_user = member,
-                to_user = instance.donger,
-                amount = instance.dong_per_person,
-            )
+        dong_record = DongRecord.objects.get_or_create(
+            for_dong = instance,
+            from_user = member,
+            to_user = instance.donger,
+            amount = instance.dong_per_person,
+        )
+        print("added a dong record")
 
 @receiver(post_save, sender = Dong)
 def post_save_func(sender, instance, created, **kwargs):
     if not created:
         child_records = DongRecord.objects.filter(for_dong__id=instance.id)
+        print("updates:",child_records)
         for dong_rec in child_records:
-            child_records.update(
-                to_user = instance.donger,
-                amount = instance.dong_per_person,
-            )
+            print("record-check")
+            if dong_rec.to_user != instance.donger:
+                child_records.update(to_user = instance.donger)
+                print("updated touser")
+            if dong_rec.amount != instance.dong_per_person:
+                child_records.update(amount = instance.dong_per_person)
+                print("updated amount")
+        print("post_updated")
+    else:
+        print("new_post")
