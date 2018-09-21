@@ -67,4 +67,7 @@ def post_save_func(sender, instance, created, **kwargs):
     if not created:
         child_records = DongRecord.objects.filter(for_dong__id=instance.id)
         for dong_rec in child_records:
-            child_records.update(amount = instance.dong_per_person)
+            child_records.update(
+                to_user = instance.donger,
+                amount = instance.dong_per_person,
+            )
