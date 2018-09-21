@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models.signals import m2m_changed
+from django.db.models.signals import post_save, m2m_changed
 from django.dispatch import receiver
 
 class User(models.Model):
@@ -50,8 +50,9 @@ class DongRecord(models.Model):
     paid = models.BooleanField(default = False, null = True, blank = True)
 
 @receiver(m2m_changed, sender = Dong.dongia.through)
-def dong_recorder(sender, instance, action, **kwargs):
+def m2m_func(sender, instance, action, **kwargs):
     for member in instance.dongia.all():
+        #print(member)
         #this is for find me to me dong!
         if member != instance.donger:
             dong_record = DongRecord.objects.get_or_create(
@@ -60,3 +61,10 @@ def dong_recorder(sender, instance, action, **kwargs):
                 to_user = instance.donger,
                 amount = instance.dong_per_person,
             )
+
+@receiver(post_save, sender = Dong)
+def post_save_func(sender, instance, created, **kwargs):
+    if not created:
+        child_records = DongRecord.objects.filter(for_dong__id=instance.id)
+        for dong_rec in child_records:
+            child_records.update(amount = instance.dong_per_person)
